@@ -5,23 +5,7 @@ const express = require("express");
 const CartRouter = express.Router();
 
 // Import Mongoose models
-/**
- * @swagger
- * components:
- *   schemas:
- *     CartItem:
- *       type: object
- *       properties:
- *         productId:
- *           type: string
- *           description: ID of the product in the cart
- *         quantity:
- *           type: number
- *           description: Quantity of the product in the cart
- *       required:
- *         - productId
- *         - quantity
- */
+
 const UserModel = require("../Models/user.model");
 const ProductModel = require("../Models/product.model");
 
@@ -34,26 +18,42 @@ CartRouter.use(Authentication);
  * @swagger
  * /cart:
  *   get:
- *     summary: Retrieve the user's cart
- *     tags:
- *       - Cart
+ *     summary: Get user's cart
+ *     tags: [Cart]
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
- *         description: Returns the user's cart
+ *         description: OK - User's cart retrieved successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/CartItem'
- *       401:
- *         description: User not authenticated
+ *                 type: object
+ *                 properties:
+ *                   productId:
+ *                     type: string
+ *                   quantity:
+ *                     type: string
  *       404:
- *         description: User not found
+ *         description: Not Found - User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       500:
  *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  */
 
 // Route: GET "/cart"
@@ -81,6 +81,89 @@ CartRouter.get("/", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /cart/add:
+ *   post:
+ *     summary: Add a product to the cart
+ *     tags: [Cart]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK - Product added to cart successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - User not found / Product is not available
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       409:
+ *         description: Conflict - Product already in cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *           type: string
+ *         cart:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/CartItem"
+ *
+ *     CartItem:
+ *       type: object
+ *       properties:
+ *         productId:
+ *           type: string
+ *         quantity:
+ *           type: string
+ */
 
 // Route: POST "/cart/add"
 // Add a product to the user's cart
@@ -133,6 +216,78 @@ CartRouter.post("/add", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /cart/remove/{id}:
+ *   delete:
+ *     summary: Remove a product from the user's cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Product ID to remove from the cart
+ *         schema:
+ *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - Product removed from cart successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Product not found in cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       501:
+ *         description: Not Implemented - An error occurred while removing the product from the cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *           type: string
+ *         cart:
+ *           type: array
+ *           items:
+ *             $ref: "#/components/schemas/CartItem"
+ *
+ *     CartItem:
+ *       type: object
+ *       properties:
+ *         productId:
+ *           type: string
+ *         quantity:
+ *           type: number
+ *
+ */
+
 // CartRouter.delete("/remove/:id", ...)
 // Route to remove a product from the user's cart
 CartRouter.delete("/remove/:id", async (req, res) => {
@@ -172,6 +327,87 @@ CartRouter.delete("/remove/:id", async (req, res) => {
     return res.status(404).send({ message: "Product not found in cart" });
   }
 });
+/**
+ * @swagger
+ * /cart/increase/{id}:
+ *   patch:
+ *     summary: Increase quantity of an item in the user's cart
+ *     tags: [Cart]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the product to increase quantity in the cart.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userID:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK - Quantity updated for the product in the cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Product not found in cart or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       501:
+ *         description: Not Implemented - An error occurred during processing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *           type: string
+ *         cart:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *     CartIncreaseParams:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ */
 
 // CartRouter.patch("/increase/:id", ...)
 // Route to increase the quantity of a product in the user's cart
@@ -222,6 +458,51 @@ CartRouter.patch("/increase/:id", async (req, res) => {
     return res.status(501).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /cart/decrease/{id}:
+ *   patch:
+ *     summary: Decrease quantity of a product in the user's cart
+ *     tags: [Cart]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Product ID to decrease quantity
+ *     responses:
+ *       200:
+ *         description: OK - Quantity updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Product not found in cart or cannot decrease less than one item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       501:
+ *         description: Not Implemented - Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ */
 
 // CartRouter.patch("/decrease/:id", ...)
 // Route to decrease the quantity of a product in the user's cart

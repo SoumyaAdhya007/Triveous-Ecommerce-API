@@ -6,6 +6,70 @@ const CategorytModel = require("../Models/category.model");
 // Create an Express router instance
 const ProductRouter = express.Router();
 
+/**
+ * @swagger
+ * /product/add:
+ *   post:
+ *     summary: Add a new product
+ *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               price:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               availability:
+ *                 type: boolean
+ *               categoryId:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     parameters:
+ *       - in: query
+ *         name: apiKey
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: API key for authentication (if required)
+ *     responses:
+ *       201:
+ *         description: Created - Product added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+
 // ProductRouter.post("/add", ...)
 // Route to add a new product
 ProductRouter.post("/add", async (req, res) => {
@@ -54,6 +118,61 @@ ProductRouter.post("/add", async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 });
+
+/**
+ * @swagger
+ * /product/category/{categoryId}:
+ *   get:
+ *     summary: Get products by category ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the category to retrieve products for
+ *     responses:
+ *       200:
+ *         description: OK - Products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   categoryId:
+ *                     type: string
+ *                   quantity:
+ *                     type: string
+ *       404:
+ *         description: Not Found - Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // ProductRouter.get("/category/:categoryId", ...)
 // Route to retrieve all products for a specific category
@@ -104,6 +223,64 @@ ProductRouter.get("/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /product/change/{id}:
+ *   patch:
+ *     summary: Update a product
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the product to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               categoryId:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK - Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Product or Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+
 // ProductRouter.patch("/change/:id", ...)
 // Route to update a specific product by its ID
 ProductRouter.patch("/change/:id", async (req, res) => {
@@ -144,6 +321,49 @@ ProductRouter.patch("/change/:id", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+
+/**
+ * @swagger
+ * /product/{id}:
+ *   delete:
+ *     summary: Delete a product by ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the product to be deleted
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK - Product deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // ProductRouter.delete("/:id", ...)
 // Route to delete a specific product by its ID

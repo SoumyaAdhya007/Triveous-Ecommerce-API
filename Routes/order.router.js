@@ -13,6 +13,63 @@ const OrdersRouter = express.Router();
 
 // Apply the Authentication middleware to protect routes
 OrdersRouter.use(Authentication);
+/**
+ * @swagger
+ * /order:
+ *   get:
+ *     summary: Get user orders
+ *     tags: [Orders]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - User orders retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/Order"
+ *       404:
+ *         description: Not Found - User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     Order:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         userID:
+ *           type: string
+ *         orderDate:
+ *           type: string
+ *         items:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ */
 
 // OrdersRouter.get("/", ...)
 // Route to retrieve all orders for a specific user
@@ -39,6 +96,69 @@ OrdersRouter.get("/", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /order/details/{id}:
+ *   get:
+ *     summary: Get order details by ID
+ *     tags: [Orders]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID of the order to retrieve details for
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK - Order details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Order"
+ *       404:
+ *         description: Not Found - No such order found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     Order:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         orderDate:
+ *           type: string
+ *           format: date
+ *         items:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *         totalAmount:
+ *           type: number
+ */
 
 // OrdersRouter.get("/details/:id", ...)
 // Route to retrieve details of a specific order by its ID
@@ -62,6 +182,57 @@ OrdersRouter.get("/details/:id", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /order/place/{productId}:
+ *   post:
+ *     summary: Place an order for a product
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         description: ID of the product to be ordered
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK - Order placed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad Request - Please select an address before placing the order
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - User not found / Product not found in user cart / Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // OrdersRouter.post("/place/:productId", ...)
 // Route to place an order for a specific product
@@ -133,6 +304,60 @@ OrdersRouter.post("/place/:productId", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /order/return/{orderId}:
+ *   patch:
+ *     summary: Mark an order as returned
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the order to be marked as returned
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - Order marked as returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad Request - Order cannot be returned (status is not "delivered")
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+
 // OrdersRouter.patch("/return/:orderId", ...)
 // Route to mark an order as returned
 OrdersRouter.patch("/return/:orderId", async (req, res) => {
@@ -169,6 +394,60 @@ OrdersRouter.patch("/return/:orderId", async (req, res) => {
     return res.status(501).send({ message: error.message });
   }
 });
+
+/**
+ * @swagger
+ * /order/cancel/{orderId}:
+ *   delete:
+ *     summary: Cancel an order
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         description: ID of the order to cancel
+ *         schema:
+ *           type: string
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - Order cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad Request - Order cannot be cancelled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Order not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // OrdersRouter.delete("/cancel/:orderId", ...)
 // Route to cancel an order

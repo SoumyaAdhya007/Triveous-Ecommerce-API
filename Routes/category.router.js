@@ -6,6 +6,59 @@ const CategoryModel = require("../Models/category.model");
 
 // Create an Express router instance
 const CategoryRouter = express.Router();
+/**
+ * @swagger
+ * /category/add:
+ *   post:
+ *     summary: Add a new category
+ *     tags: [Categories]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Category added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Category must be a string
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       409:
+ *         description: Conflict - Please provide the category name
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // CategoryRouter.post("/add", ...)
 // Route to add a new category
@@ -41,6 +94,36 @@ CategoryRouter.post("/add", async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /category:
+ *   get:
+ *     summary: Get all categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: OK - Categories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // CategoryRouter.get("/", ...)
 // Route to retrieve all categories
@@ -56,6 +139,57 @@ CategoryRouter.get("/", async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /category/change/{id}:
+ *   patch:
+ *     summary: Update a category
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the category to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OK - Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // CategoryRouter.patch("/change/:id", ...)
 // Route to update a category
@@ -93,6 +227,48 @@ CategoryRouter.patch("/change/:id", async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /category/remove/{id}:
+ *   delete:
+ *     summary: Delete a category by ID
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the category to be deleted
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK - Category deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // CategoryRouter.delete("/remove/:id", ...)
 // Route to delete a category

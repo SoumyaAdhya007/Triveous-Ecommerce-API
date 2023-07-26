@@ -22,7 +22,6 @@ const userSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product", // Reference to the "Product" model for population
         required: true,
-        unique: true,
       },
       quantity: {
         type: Number,

@@ -7,6 +7,43 @@ const saltRounds = +process.env.saltRounds;
 const LOGIN_TOKEN_SECRET = process.env.LOGIN_TOKEN_SECRET;
 const UserModel = require("../Models/user.model");
 const { Authentication } = require("../Middleware/authentication.middleware");
+// Swagger documentation for /signup route
+/**
+ * @swagger
+ * /user/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User Registered Successfully
+ *       409:
+ *         description: Conflict - Please provide all fields / Email or Phone number already registered
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // UserRouter.post("/signup", ...)
 // Route to register a new user
@@ -15,7 +52,7 @@ UserRouter.post("/signup", async (req, res) => {
   const { name, email, password, phone } = req.body;
 
   // Check if all required user details are provided
-  if (!name || !phone || !password) {
+  if (!name || !email || !phone || !password) {
     return res.status(409).send({ message: "Please provide all fields" });
   }
 
@@ -66,6 +103,56 @@ UserRouter.post("/signup", async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /user/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login Successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userInfo:
+ *                   $ref: "#/components/schemas/User"
+ *       401:
+ *         description: Unauthorized - Wrong Credentials
+ *       404:
+ *         description: Not Found - User not found
+ *       409:
+ *         description: Conflict - Provide email and password to login
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       headers:
+ *         Set-Cookie:
+ *           schema:
+ *             type: string
+ *             example: "token=YOUR_JWT_TOKEN; HttpOnly; Max-Age=604800; Path=/"
+ */
 
 // UserRouter.post("/login", ...)
 // Route to authenticate a user and generate a JWT token upon successful login
@@ -129,6 +216,79 @@ UserRouter.post("/login", async (req, res) => {
 // Middleware to ensure authentication for the routes below
 UserRouter.use(Authentication);
 
+/**
+ * @swagger
+ * /user/details:
+ *   get:
+ *     summary: Get user details
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - User details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/User"
+ *       401:
+ *         description: Unauthorized - User not found / Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *           type: string
+ *         cart:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *         address:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               pincode:
+ *                 type: number
+ *               state:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               road_name:
+ *                 type: string
+ *               isSelected:
+ *                 type: boolean
+ */
+
 // UserRouter.get("/details", ...)
 // Route to retrieve user details by userID
 UserRouter.get("/details", async (req, res) => {
@@ -151,6 +311,58 @@ UserRouter.get("/details", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /user/address:
+ *   get:
+ *     summary: Get user addresses
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: OK - User addresses retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/UserAddress"
+ *       401:
+ *         description: Unauthorized - User not found / Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *
+ * components:
+ *   schemas:
+ *     UserAddress:
+ *       type: object
+ *       properties:
+ *         pincode:
+ *           type: number
+ *         state:
+ *           type: string
+ *         city:
+ *           type: string
+ *         road_name:
+ *           type: string
+ *         isSelected:
+ *           type: boolean
+ */
 
 // UserRouter.get("/address", ...)
 // Route to retrieve user addresses by userID
@@ -174,6 +386,60 @@ UserRouter.get("/address", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /user/address/add:
+ *   post:
+ *     summary: Add a new address for the user
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pincode:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               road_name:
+ *                 type: string
+ *               isSelected:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: OK - User address saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // UserRouter.post("/address/add", ...)
 // Route to add a new address to the user's address list
@@ -224,6 +490,59 @@ UserRouter.post("/address/add", async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 });
+/**
+ * @swagger
+ * /user/address/select/{id}:
+ *   patch:
+ *     summary: Select a user address
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the address to select
+ *     responses:
+ *       200:
+ *         description: OK - Address selected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - User not found / Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found - Address not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // UserRouter.patch("/address/select/:id", ...)
 // Route to select a specific address as the user's default address
