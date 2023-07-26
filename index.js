@@ -47,16 +47,16 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Learning Swagger",
+      title: "E-Commerce API",
       version: "1.0.0",
     },
     servers: [
       {
-        url: "http://localhost:7080",
+        url: "https://triveous-ecommerce-api.onrender.com",
       },
     ],
   },
-  apis: ["./routes/*.js"],
+  apis: ["./Routes/*.js"],
 };
 
 const swaggerSpec = swaggerJSdoc(options);
