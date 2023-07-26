@@ -1,11 +1,20 @@
+// Import required modules
 const express = require("express");
-const ProductModel = require("../Models/category.model");
+const ProductModel = require("../Models/product.model");
 const CategorytModel = require("../Models/category.model");
+
+// Create an Express router instance
 const ProductRouter = express.Router();
+
+// ProductRouter.post("/add", ...)
+// Route to add a new product
 ProductRouter.post("/add", async (req, res) => {
+  // Extract product details from the request body
   const { title, price, description, availability, categoryId, images } =
     req.body;
+
   try {
+    // Check if all required product details are provided
     if (
       !title ||
       !price ||
@@ -14,13 +23,19 @@ ProductRouter.post("/add", async (req, res) => {
       !categoryId ||
       !images
     ) {
-      return res.send(404).send({ message: "Please Provied All details" });
+      return res.status(404).send({ message: "Please Provide All Details" });
     }
+
+    // Find the category with the provided categoryId
     const findCategory = await CategorytModel.findOne({ _id: categoryId });
+
+    // If the category is not found, return a 404 Not Found status with an error message
     if (!findCategory) {
       return res.status(404).send({ message: "Category not found" });
     }
-    const product = await ProductModel({
+
+    // Create a new ProductModel instance with the product details
+    const product = new ProductModel({
       title,
       price,
       description,
@@ -28,71 +43,133 @@ ProductRouter.post("/add", async (req, res) => {
       categoryId,
       images,
     });
+
+    // Save the product to the database
     await product.save();
+
+    // Return a success message with a 201 Created status
     res.status(201).send({ message: "Product added successfully" });
   } catch (error) {
+    // If any error occurs during processing, return a 500 Internal Server Error status with an error message
     return res.status(500).send({ message: error.message });
   }
 });
+
+// ProductRouter.get("/category/:categoryId", ...)
+// Route to retrieve all products for a specific category
 ProductRouter.get("/category/:categoryId", async (req, res) => {
+  // Extract the categoryId from the URL parameter
   const categoryId = req.params.categoryId;
+
   try {
+    // Find the category with the provided categoryId
     const findCategory = await CategorytModel.findOne({ _id: categoryId });
+
+    // If the category is not found, return a 404 Not Found status with an error message
     if (!findCategory) {
       return res.status(404).send({ message: "Category not found" });
     }
-    const products = await CategorytModel.find({ categoryId });
+
+    // Retrieve all products for the specified category
+    const products = await ProductModel.find({ categoryId });
+
+    // Return the products as a response with a 200 OK status
     res.status(200).send(products);
   } catch (error) {
+    // If any error occurs during processing, return a 500 Internal Server Error status with an error message
     res.status(500).send({ message: error.message });
   }
 });
+
+// ProductRouter.get("/:id", ...)
+// Route to retrieve details of a specific product by its ID
 ProductRouter.get("/:id", async (req, res) => {
+  // Extract the product ID from the URL parameter
   const id = req.params.id;
+
   try {
+    // Find the product with the provided ID
     const product = await ProductModel.findOne({ _id: id });
+
+    // If the product is not found, return a 404 Not Found status with an error message
     if (!product) {
       return res.status(404).send({ message: "Product not found" });
     }
+
+    // Return the product details as a response with a 200 OK status
     res.status(200).send(product);
   } catch (error) {
+    // If any error occurs during processing, return a 500 Internal Server Error status with an error message
     res.status(500).send({ message: error.message });
   }
 });
-ProductRouter.patch("/:id", async (req, res) => {
+
+// ProductRouter.patch("/change/:id", ...)
+// Route to update a specific product by its ID
+ProductRouter.patch("/change/:id", async (req, res) => {
+  // Extract the product ID from the URL parameter
   const id = req.params.id;
+
+  // Extract the payload (updated product details) from the request body
   const payload = req.body;
+
   try {
+    // Find the product with the provided ID
     const product = await ProductModel.findOne({ _id: id });
+
+    // If the product is not found, return a 404 Not Found status with an error message
     if (!product) {
       return res.status(404).send({ message: "Product not found" });
     }
+
+    // If the payload contains categoryId, check if the category exists
     if (payload.categoryId) {
       const findCategory = await CategorytModel.findOne({
         _id: payload.categoryId,
       });
+
+      // If the category is not found, return a 404 Not Found status with an error message
       if (!findCategory) {
         return res.status(404).send({ message: "Category not found" });
       }
     }
+
+    // Update the product with the provided payload
     await ProductModel.findByIdAndUpdate({ _id: id }, payload);
+
+    // Return a success message with a 200 OK status
     res.status(200).send({ message: "Product updated successfully" });
   } catch (error) {
+    // If any error occurs during processing, return a 500 Internal Server Error status with an error message
     res.status(500).send({ message: error.message });
   }
 });
+
+// ProductRouter.delete("/:id", ...)
+// Route to delete a specific product by its ID
 ProductRouter.delete("/:id", async (req, res) => {
+  // Extract the product ID from the URL parameter
   const id = req.params.id;
 
   try {
+    // Find the product with the provided ID
     const product = await ProductModel.findOne({ _id: id });
+
+    // If the product is not found, return a 404 Not Found status with an error message
     if (!product) {
       return res.status(404).send({ message: "Product not found" });
     }
+
+    // Delete the product from the database
     await ProductModel.delete({ _id: id });
+
+    // Return a success message with a 200 OK status
     res.status(200).send({ message: "Product deleted successfully" });
   } catch (error) {
+    // If any error occurs during processing, return a 500 Internal Server Error status with an error message
     res.status(500).send({ message: error.message });
   }
 });
+
+// Export the ProductRouter so that it can be used in other parts of the application
 module.exports = { ProductRouter };
